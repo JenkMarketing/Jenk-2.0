@@ -1,20 +1,27 @@
 # Goals
 
-_Update this file at the start of each quarter._
+_Last updated: 2026-03-23_
 
 ---
 
-## Q1 2026 (Current)
+## Next 30 Days
+- Land first 3–5 paying clients
 
-**Primary Goal:** $10,000/month profit by end of 2026.
+## Next 90 Days
+- 10 clients at $197–$297/month = **$2,000–$3,000 MRR**
 
-### Milestones
-- [ ] Land first paying client
-- [ ] Identify and commit to primary outreach/marketing channel
-- [ ] Define and document core offer clearly
-- [ ] Set up GHL pipeline for client management
-- [ ] Automate key business functions with Claude
+## Next 6 Months
+- 30 clients
+- Hire first VA for delivery
+
+## Next 12 Months
+- 50–100 clients
+- VA handles delivery
+- Owner does sales + marketing only
+
+## Long-Term Target
+- **130 clients at $197–$297/month = ~$30K/month**
 
 ---
 
-_No formal quarterly goals set yet — milestones above are derived from Sam's stated priorities. Revisit at Q2 start (April 2026)._
+_Revisit and update at the start of each quarter._

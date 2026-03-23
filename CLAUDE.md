@@ -40,6 +40,19 @@ These are workflows to build over time based on Sam's recurring needs:
 
 ---
 
+## Business Knowledge
+
+These files contain my complete business training and are loaded when working on related tasks:
+
+- @references/course/business-model.md — full product, pricing, delivery, sales process
+- @references/course/cold-sms.md — SMS sequences, scripts, pipeline stages, call scripts
+- @references/course/cold-calling.md — calling scripts, objections, KPIs, follow-up system
+- @references/course/community-insights.md — what works, what doesn't, warnings
+
+Load the relevant file when working on outreach, sales, delivery, or client management tasks.
+
+---
+
 ## Decision Log
 
 Important decisions go in `decisions/log.md`. Append-only — never edit past entries.
