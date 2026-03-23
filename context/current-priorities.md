@@ -1,9 +1,9 @@
 # Current Priorities
 
-_Last updated: 2026-03-11_
+_Last updated: 2026-03-23_
 
-1. 🎯 **Client acquisition** — #1 focus. Get first paying clients.
-2. 📣 **Figure out outreach/marketing strategy** — Identify what channel works best (cold DM, cold email, content, etc.)
-3. 📚 **Learn from Kai Stone** — Study and apply his scaling approach to FrontDesk.
-4. 🤖 **Automate the business with Claude** — Set up AI systems to handle as much as possible.
-5. 📋 **Build toward VA handoff** — Start documenting operations so client fulfillment can be handed off when ready.
+1. 🎯 **Get next paying clients** — outreach is the #1 focus
+2. 🤖 **Build GHL Business OS** — connect Claude Code to GHL API
+3. 📱 **Set up cold SMS pipeline** in outreach sub-account
+4. 🎬 **Build Trojan Loom VSL**
+5. 📞 **Start cold calling** — 500–1000 calls as foundation

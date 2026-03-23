@@ -1,8 +1,9 @@
 # About Sam Jenkins
 
-**Role:** Owner & CEO
-**Company:** FrontDesk
+**Name:** Sam Jenkins
+**Location:** Sydney, Australia
+**Role:** Agency owner — solo operator scaling to VA-assisted
+**Personality:** High energy, moves fast, learns by doing, hates wasted time
 **Timezone:** AEST (Australian Eastern Standard Time)
-**What I do:** Building a business that sells AI automations to other businesses.
 
 **#1 Priority:** Client acquisition — everything else supports this.
