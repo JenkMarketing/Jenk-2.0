@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jenk. OS</title>
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Titan+One&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --black:   #0B0B0B;
+      --surface: #141414;
+      --border:  #262626;
+      --blue:    #4B3FEE;
+      --blue-dim: #1a1730;
+      --text:    #F2F2EE;
+      --muted:   #6B6B6B;
+      --muted2:  #3A3A3A;
+      --orange:  #f97316;
+      --green:   #22c55e;
+      --red:     #ef4444;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--black);
+      color: var(--text);
+      font-family: 'DM Sans', system-ui, sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── Setup ── */
+    #setup {
+      max-width: 480px;
+      margin: 80px auto;
+      background: var(--surface);
+      border: 1px solid #222;
+      border-radius: 12px;
+      padding: 32px;
+    }
+    #setup h2 { font-size: 18px; color: #fff; margin-bottom: 6px; }
+    #setup p { font-size: 13px; color: #555; margin-bottom: 24px; }
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+    .field input {
+      width: 100%; background: #1a1a1a; border: 1px solid #2a2a2a;
+      border-radius: 6px; padding: 10px 12px; color: var(--text);
+      font-size: 13px; font-family: monospace; outline: none;
+    }
+    .field input:focus { border-color: var(--blue); }
+    .save-btn {
+      width: 100%; background: var(--blue); border: none; border-radius: 6px;
+      padding: 12px; color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 8px;
+    }
+    .save-btn:hover { background: #3a30d4; }
+
+    /* ── App shell ── */
+    #app { display: none; flex-direction: column; min-height: 100vh; }
+
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 28px; border-bottom: 1px solid #1a1a1a;
+      background: var(--black); position: sticky; top: 0; z-index: 10;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 32px; }
+    .logo {
+      font-family: 'Titan One', sans-serif;
+      font-size: 22px;
+      color: var(--text);
+      letter-spacing: -0.02em;
+      transform: skewX(-4deg);
+      display: inline-block;
+    }
+    .logo .dot { color: var(--blue); }
+
+    .tabs { display: flex; gap: 4px; }
+    .tab {
+      background: none; border: none; color: #555; font-size: 13px;
+      font-weight: 500; padding: 7px 14px; border-radius: 6px; cursor: pointer;
+      transition: all 0.15s;
+    }
+    .tab:hover { color: #ccc; background: var(--surface); }
+    .tab.active { color: #fff; background: var(--border); }
+
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+    .sync-info { font-size: 12px; color: #444; }
+
+    .btn {
+      background: none; border: 1px solid #2a2a2a; color: #666;
+      font-size: 11px; padding: 5px 10px; border-radius: 5px; cursor: pointer; transition: all 0.15s;
+    }
+    .btn:hover { border-color: var(--blue); color: var(--blue); }
+    .btn.danger:hover { border-color: #ef4444; color: #ef4444; }
+
+    .content { padding: 28px; flex: 1; }
+
+    /* ── Tab views ── */
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* ── Brief header ── */
+    .brief-date {
+      font-family: 'Titan One', sans-serif;
+      font-size: 24px;
+      color: var(--text);
+      margin-bottom: 4px;
+      transform: skewX(-4deg);
+      display: inline-block;
+    }
+    .brief-sub { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+
+    /* ── Stats row ── */
+    .stats-row {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+      padding: 16px; text-align: center;
+    }
+    .stat-num { font-size: 28px; font-weight: 700; color: #fff; line-height: 1; }
+    .stat-num.hot { color: #f97316; }
+    .stat-num.blue { color: var(--blue); }
+    .stat-num.green { color: #22c55e; }
+    .stat-label { font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 6px; }
+
+    /* ── Panels ── */
+    .panel {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 20px; margin-bottom: 16px;
+    }
+    .panel-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;
+    }
+    .panel-title {
+      font-size: 12px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 1px; color: #555; display: flex; align-items: center; gap: 8px;
+    }
+    .panel-title .icon { font-size: 14px; }
+    .badge {
+      font-size: 11px; background: var(--blue-dim); color: var(--blue);
+      padding: 2px 8px; border-radius: 20px;
+    }
+    .badge.hot { background: #2d1a0e; color: #f97316; }
+    .badge.green { background: #0f2318; color: #22c55e; }
+
+    /* ── Lead rows ── */
+    .lead-list { display: flex; flex-direction: column; gap: 10px; }
+    .lead-card {
+      background: #111; border: 1px solid var(--border); border-radius: 8px;
+      padding: 14px 16px;
+    }
+    .lead-card.warm { border-left: 3px solid #f97316; }
+    .lead-card.followup { border-left: 3px solid var(--blue); }
+    .lead-top { display: flex; align-items: center; gap: 16px; margin-bottom: 8px; }
+    .lead-name { font-size: 14px; font-weight: 600; color: #fff; min-width: 140px; }
+    .lead-phone { font-size: 13px; color: #888; font-family: monospace; }
+    .lead-niche {
+      font-size: 11px; background: var(--blue-dim); color: var(--blue);
+      padding: 2px 8px; border-radius: 4px; margin-left: auto;
+    }
+    .lead-opener {
+      font-size: 12px; color: #555; font-style: italic; line-height: 1.5;
+      border-left: 2px solid #2a2a2a; padding-left: 10px; margin-top: 4px;
+    }
+    .lead-stage {
+      font-size: 11px; padding: 2px 8px; border-radius: 4px;
+      background: #1e2435; color: #6b9cf7; margin-left: auto;
+    }
+
+    /* ── Action list ── */
+    .action-list { display: flex; flex-direction: column; gap: 10px; }
+    .action-item {
+      display: flex; align-items: flex-start; gap: 14px;
+      background: #111; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px;
+    }
+    .action-num {
+      font-size: 12px; font-weight: 700; color: var(--blue);
+      background: var(--blue-dim); border-radius: 50%; width: 24px; height: 24px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .action-text { font-size: 13px; color: #ccc; line-height: 1.5; padding-top: 3px; }
+    .ai-badge {
+      font-size: 10px; color: #555; padding: 2px 6px;
+      border: 1px solid #222; border-radius: 4px; margin-left: auto; flex-shrink: 0;
+    }
+
+    /* ── Calendar placeholder ── */
+    .cal-placeholder {
+      padding: 20px; text-align: center; color: #444; font-size: 13px;
+      border: 1px dashed #222; border-radius: 8px;
+    }
+    .cal-placeholder a { color: var(--blue); text-decoration: none; }
+
+    /* ── Empty state ── */
+    .empty { padding: 24px; text-align: center; color: #333; font-size: 13px; }
+    .empty span { display: block; font-size: 28px; margin-bottom: 8px; }
+
+    /* ── Existing table styles ── */
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .panel.full-width { grid-column: 1 / -1; }
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      text-align: left; font-size: 11px; text-transform: uppercase;
+      letter-spacing: 0.8px; color: #555; padding: 0 0 10px 0; border-bottom: 1px solid #222;
+    }
+    td {
+      padding: 10px 0; font-size: 13px;
+      border-bottom: 1px solid #1a1a1a; vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    .tag {
+      display: inline-block; font-size: 10px; padding: 2px 7px;
+      border-radius: 4px; background: var(--blue-dim); color: var(--blue); margin: 1px 2px 1px 0;
+    }
+    .tag.empty { color: #444; background: #1a1a1a; }
+    .pill { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 20px; }
+    .pill.active { background: #14291a; color: #22c55e; }
+
+    .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .status-item {
+      background: #1a1a1a; border: 1px solid #222; border-radius: 8px;
+      padding: 14px 16px; display: flex; align-items: center; gap: 12px;
+    }
+    .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .dot.green { background: #22c55e; box-shadow: 0 0 8px #22c55e88; }
+    .dot.red { background: #ef4444; box-shadow: 0 0 8px #ef444488; }
+    .dot.grey { background: #444; }
+    .status-label { font-size: 13px; color: #ccc; }
+    .status-sub { font-size: 11px; color: #555; margin-top: 2px; }
+
+    .loading { color: #444; font-size: 13px; padding: 20px 0; text-align: center; }
+    .error-msg {
+      color: #ef4444; font-size: 12px; padding: 12px;
+      background: #1a0d0d; border-radius: 6px; border: 1px solid #3a1a1a;
+    }
+
+    /* ── Blueprint Tab ── */
+    .bp-hero {
+      background: linear-gradient(135deg, #0f1a2e 0%, var(--black) 60%);
+      border: 1px solid #1e2d47; border-radius: 14px;
+      padding: 36px 40px; margin-bottom: 28px; position: relative; overflow: hidden;
+    }
+    .bp-hero::before {
+      content: ''; position: absolute; top: -60px; right: -60px;
+      width: 200px; height: 200px; border-radius: 50%;
+      background: radial-gradient(circle, var(--blue)22 0%, transparent 70%);
+    }
+    .bp-hero-tag {
+      font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--blue); margin-bottom: 12px;
+    }
+    .bp-hero-title {
+      font-family: 'Titan One', sans-serif;
+      font-size: 32px; color: var(--text); line-height: 1.2; margin-bottom: 10px;
+      transform: skewX(-4deg); display: inline-block;
+    }
+    .bp-hero-title span { color: var(--blue); }
+    .bp-hero-sub { font-size: 14px; color: #555; max-width: 600px; line-height: 1.6; }
+
+    .bp-sections { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 28px; }
+    .bp-section-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      padding: 24px; transition: border-color 0.2s;
+    }
+    .bp-section-card:hover { border-color: #2a2a2a; }
+    .bp-section-card.sales { border-top: 3px solid #f97316; }
+    .bp-section-card.ops { border-top: 3px solid var(--blue); }
+    .bp-section-card.mktg { border-top: 3px solid #a855f7; }
+    .bp-section-icon { font-size: 24px; margin-bottom: 10px; }
+    .bp-section-title { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+    .bp-section-desc { font-size: 12px; color: #555; line-height: 1.6; margin-bottom: 16px; }
+    .bp-list { display: flex; flex-direction: column; gap: 6px; }
+    .bp-list-item {
+      display: flex; align-items: flex-start; gap: 8px;
+      font-size: 12px; color: #888; line-height: 1.5;
+    }
+    .bp-list-item::before { content: '→'; color: #333; flex-shrink: 0; margin-top: 1px; }
+
+    .bp-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+    .bp-full { margin-bottom: 20px; }
+
+    .bp-offer-table { width: 100%; border-collapse: collapse; }
+    .bp-offer-table th {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 1px;
+      color: #444; padding: 0 0 10px 0; border-bottom: 1px solid var(--border); text-align: left;
+    }
+    .bp-offer-table td { padding: 12px 0; border-bottom: 1px solid #141414; font-size: 13px; color: #bbb; }
+    .bp-offer-table tr:last-child td { border-bottom: none; }
+    .bp-price { font-weight: 700; color: #22c55e; font-size: 15px; }
+    .bp-tier { font-weight: 600; color: #fff; }
+
+    .bp-outreach-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .bp-outreach-item {
+      background: #111; border: 1px solid #1a1a1a; border-radius: 8px; padding: 14px;
+    }
+    .bp-outreach-name { font-size: 13px; font-weight: 600; color: #fff; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+    .bp-outreach-desc { font-size: 12px; color: #555; line-height: 1.5; }
+    .dot-active { width: 7px; height: 7px; border-radius: 50%; background: #f97316; box-shadow: 0 0 6px #f9731688; flex-shrink: 0; }
+    .dot-paid { width: 7px; height: 7px; border-radius: 50%; background: #eab308; flex-shrink: 0; }
+    .dot-passive { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 6px #22c55e66; flex-shrink: 0; }
+
+    .bp-process { display: flex; flex-direction: column; gap: 0; }
+    .bp-step {
+      display: flex; align-items: flex-start; gap: 16px; padding: 14px 0;
+      border-bottom: 1px solid #141414;
+    }
+    .bp-step:last-child { border-bottom: none; }
+    .bp-step-num {
+      width: 28px; height: 28px; border-radius: 50%; background: var(--blue-dim);
+      border: 1px solid #2a3a50; display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: var(--blue); flex-shrink: 0;
+    }
+    .bp-step-content { flex: 1; }
+    .bp-step-title { font-size: 13px; font-weight: 600; color: #fff; margin-bottom: 3px; }
+    .bp-step-desc { font-size: 12px; color: #555; line-height: 1.5; }
+    .bp-step-rule {
+      font-size: 11px; color: var(--blue); background: #0f1a2e;
+      border-radius: 4px; padding: 3px 8px; margin-top: 6px; display: inline-block;
+    }
+
+    .bp-flywheel {
+      display: flex; align-items: center; justify-content: center;
+      flex-wrap: wrap; gap: 0; padding: 20px 0;
+    }
+    .bp-fw-step {
+      background: #111; border: 1px solid var(--border); border-radius: 8px;
+      padding: 10px 16px; font-size: 12px; color: #bbb; text-align: center; min-width: 110px;
+    }
+    .bp-fw-arrow { font-size: 16px; color: #2a2a2a; padding: 0 6px; }
+
+    .bp-revenue { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+    .bp-rev-card {
+      background: #111; border: 1px solid var(--border); border-radius: 8px; padding: 16px; text-align: center;
+    }
+    .bp-rev-clients { font-size: 22px; font-weight: 800; color: #fff; line-height: 1; }
+    .bp-rev-label { font-size: 10px; color: #444; text-transform: uppercase; letter-spacing: 0.8px; margin: 4px 0; }
+    .bp-rev-mrr { font-size: 13px; color: #22c55e; font-weight: 600; }
+
+    .bp-next { display: flex; flex-direction: column; gap: 8px; }
+    .bp-next-item {
+      display: flex; align-items: center; gap: 12px;
+      background: #111; border: 1px solid #1a1a1a; border-radius: 8px; padding: 12px 16px;
+    }
+    .bp-next-check {
+      width: 18px; height: 18px; border-radius: 4px; border: 1px solid #2a2a2a;
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+      font-size: 11px;
+    }
+    .bp-next-check.done { background: #14291a; border-color: #22c55e; color: #22c55e; }
+    .bp-next-check.now { background: #2d1a0e; border-color: #f97316; color: #f97316; }
+    .bp-next-text { font-size: 13px; color: #bbb; }
+    .bp-next-text strong { color: #fff; }
+    .bp-next-tag {
+      margin-left: auto; font-size: 10px; padding: 2px 8px; border-radius: 20px;
+      background: var(--blue-dim); color: var(--blue); flex-shrink: 0;
+    }
+    .bp-next-tag.now { background: #2d1a0e; color: #f97316; }
+    .bp-next-tag.soon { background: #1e2318; color: #22c55e; }
+  </style>
+</head>
+<body>
+
+<!-- Setup Screen -->
+<div id="setup">
+  <h2 style="font-family:'Titan One',sans-serif;transform:skewX(-4deg);display:inline-block;margin-bottom:6px;">Jenk<span style="color:var(--blue)">.</span></h2>
+  <p>Enter your GHL API keys. Stored locally in your browser.</p>
+  <div class="field">
+    <label>Agency API Key</label>
+    <input id="inp-agency" type="password" placeholder="pit-...">
+  </div>
+  <div class="field">
+    <label>Jenk Marketing API Key</label>
+    <input id="inp-jenk" type="password" placeholder="pit-...">
+  </div>
+  <div class="field">
+    <label>Jenk Location ID</label>
+    <input id="inp-location" type="text" placeholder="hGjA7vMcMtyndotxnIvY">
+  </div>
+  <button class="save-btn" onclick="saveConfig()">Save & Launch Dashboard</button>
+</div>
+
+<!-- App -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="logo">Jenk<span class="dot">.</span></div>
+      <nav class="tabs">
+        <button class="tab active" onclick="showTab('brief')">⚡ Morning Brief</button>
+        <button class="tab" onclick="showTab('contacts')">👥 Contacts</button>
+        <button class="tab" onclick="showTab('agency')">🏢 Agency</button>
+        <button class="tab" onclick="showTab('blueprint')">🎯 Blueprint</button>
+      </nav>
+    </div>
+    <div class="topbar-right">
+      <span class="sync-info" id="lastSync">—</span>
+      <button class="btn" onclick="loadAll()">↻ Refresh</button>
+      <button class="btn danger" onclick="resetConfig()">Reset Keys</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ── Morning Brief Tab ── -->
+    <div id="view-brief" class="view active">
+      <div class="brief-date" id="brief-date">—</div>
+      <div class="brief-sub">We build systems that never sleep. — here's what matters today.</div>
+
+      <!-- Stats row -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-num hot" id="stat-warm">—</div>
+          <div class="stat-label">Warm Leads</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num blue" id="stat-followup">—</div>
+          <div class="stat-label">Follow-Ups</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num green" id="stat-booked">—</div>
+          <div class="stat-label">Booked</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num green" id="stat-closed">—</div>
+          <div class="stat-label">Closed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="stat-total">—</div>
+          <div class="stat-label">In Pipeline</div>
+        </div>
+      </div>
+
+      <!-- Priority Actions -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title"><span class="icon">⚡</span> Today's Priority Actions</div>
+          <span id="ai-label" class="ai-badge" style="display:none">AI-powered</span>
+        </div>
+        <div id="actionList"><div class="loading">Loading...</div></div>
+      </div>
+
+      <!-- Warm Leads -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title"><span class="icon">🔥</span> Warm Leads — Call These First</div>
+          <span class="badge hot" id="warm-count">—</span>
+        </div>
+        <div id="warmLeads"><div class="loading">Loading...</div></div>
+      </div>
+
+      <!-- Follow-Ups -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title"><span class="icon">📋</span> Follow-Ups Due</div>
+          <span class="badge" id="followup-count">—</span>
+        </div>
+        <div id="followupList"><div class="loading">Loading...</div></div>
+      </div>
+
+      <!-- Calendar -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title"><span class="icon">📅</span> Today's Schedule</div>
+        </div>
+        <div class="cal-placeholder">
+          Calendar integration coming soon — will show booked calls and appointments here.
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Contacts Tab ── -->
+    <div id="view-contacts" class="view">
+      <div class="panel full-width">
+        <div class="panel-header">
+          <div class="panel-title">Jenk Marketing — Recent Contacts</div>
+          <span class="badge" id="contact-count">—</span>
+        </div>
+        <div id="contactsPanel"><div class="loading">Loading...</div></div>
+      </div>
+    </div>
+
+    <!-- ── Agency Tab ── -->
+    <div id="view-agency" class="view">
+      <div class="grid">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Connection Status</div>
+          </div>
+          <div class="status-grid">
+            <div class="status-item">
+              <div class="dot grey" id="dot-agency"></div>
+              <div>
+                <div class="status-label">Agency API</div>
+                <div class="status-sub" id="status-agency-sub">Checking...</div>
+              </div>
+            </div>
+            <div class="status-item">
+              <div class="dot grey" id="dot-jenk"></div>
+              <div>
+                <div class="status-label">Jenk Marketing API</div>
+                <div class="status-sub" id="status-jenk-sub">Checking...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Agency Overview</div>
+            <span class="badge" id="subaccount-count">—</span>
+          </div>
+          <div id="agencyPanel"><div class="loading">Loading...</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Blueprint Tab ── -->
+    <div id="view-blueprint" class="view">
+
+      <!-- Hero -->
+      <div class="bp-hero">
+        <div class="bp-hero-tag">🎯 FrontDesk — Business Blueprint</div>
+        <div class="bp-hero-title">Sell the system. <span>Keep the client.</span><br>Scale with automation.</div>
+        <div class="bp-hero-sub">Pre-built GHL marketing system for high-volume trades. Same product every time. Only custom values change. Delivered in 7 days. Retained forever.</div>
+      </div>
+
+      <!-- 3 Categories -->
+      <div class="bp-sections">
+        <div class="bp-section-card sales">
+          <div class="bp-section-icon">💰</div>
+          <div class="bp-section-title">Sales</div>
+          <div class="bp-section-desc">Every method, every script, every close. Volume in → conversions out.</div>
+          <div class="bp-list">
+            <div class="bp-list-item">Cold SMS — 500 sends/day, 3-message sequence</div>
+            <div class="bp-list-item">Cold calling — 50-150 calls/day, script ready</div>
+            <div class="bp-list-item">Trojan Loom — personalised 2-min screen recordings</div>
+            <div class="bp-list-item">Instagram/Facebook DMs — warm, conversational</div>
+            <div class="bp-list-item">Facebook local business groups — free warm leads</div>
+            <div class="bp-list-item">Paid ads — $35/day image ads (activate at 5+ clients)</div>
+          </div>
+        </div>
+        <div class="bp-section-card ops">
+          <div class="bp-section-icon">⚙️</div>
+          <div class="bp-section-title">Operations</div>
+          <div class="bp-section-desc">Same system every client. Snapshot-based. 7-day delivery. VA-ready.</div>
+          <div class="bp-list">
+            <div class="bp-list-item">Day 1: Sub-account + snapshot + custom values</div>
+            <div class="bp-list-item">Day 2-4: Website — home, services, areas, FAQ, about</div>
+            <div class="bp-list-item">Day 5: Domain + go-live + full QA</div>
+            <div class="bp-list-item">Day 6: Launch call — walk through mobile app</div>
+            <div class="bp-list-item">VA takes over delivery at 10 clients</div>
+            <div class="bp-list-item">Setter/caller hired at 20 clients</div>
+          </div>
+        </div>
+        <div class="bp-section-card mktg">
+          <div class="bp-section-icon">📣</div>
+          <div class="bp-section-title">Marketing</div>
+          <div class="bp-section-desc">Position Sam as the trades marketing expert. Content compounds. Referrals scale.</div>
+          <div class="bp-list">
+            <div class="bp-list-item">Instagram reels — results, education, behind the scenes</div>
+            <div class="bp-list-item">Facebook groups — value-first posts → warm DMs</div>
+            <div class="bp-list-item">VSL landing page — Trojan Loom pre-sells every prospect</div>
+            <div class="bp-list-item">Google Business Profile — free inbound leads</div>
+            <div class="bp-list-item">Referral program — free month for every referral</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bp-row">
+        <!-- Offer Stack -->
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">💵 The Offer Stack</div></div>
+          <table class="bp-offer-table">
+            <tr><th>Tier</th><th>Price</th><th>What They Get</th></tr>
+            <tr><td><span class="bp-tier">Entry</span></td><td><span class="bp-price">$97/mo</span></td><td>Website only — foot in the door</td></tr>
+            <tr><td><span class="bp-tier">Core</span></td><td><span class="bp-price">$197/mo</span></td><td>Full system — all 5 features</td></tr>
+            <tr><td><span class="bp-tier">Premium</span></td><td><span class="bp-price">$297/mo</span></td><td>Full system + priority support</td></tr>
+          </table>
+          <div style="margin-top:14px;padding:10px 14px;background:#111;border-radius:6px;border-left:3px solid #f97316;">
+            <div style="font-size:11px;color:#f97316;font-weight:600;margin-bottom:3px;">RULE</div>
+            <div style="font-size:12px;color:#777;">Never lead with $97. Lead with $297, downsell to $197 only if needed.</div>
+          </div>
+        </div>
+        <!-- Outreach Methods -->
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">📡 Outreach Methods</div></div>
+          <div class="bp-outreach-grid">
+            <div class="bp-outreach-item"><div class="bp-outreach-name"><div class="dot-active"></div>Cold SMS</div><div class="bp-outreach-desc">500/day → 10-20 replies → 2-5 positive → 1-2 calls</div></div>
+            <div class="bp-outreach-item"><div class="bp-outreach-name"><div class="dot-active"></div>Cold Calling</div><div class="bp-outreach-desc">50-150 calls/day → 1-2 bookings. Most closes on call 5-11.</div></div>
+            <div class="bp-outreach-item"><div class="bp-outreach-name"><div class="dot-active"></div>Trojan Loom</div><div class="bp-outreach-desc">25 videos/day → 1-2 clients/day. Highest conversion.</div></div>
+            <div class="bp-outreach-item"><div class="bp-outreach-name"><div class="dot-active"></div>Social DMs</div><div class="bp-outreach-desc">Instagram/Facebook. Warm, conversational. No hard sell.</div></div>
+            <div class="bp-outreach-item"><div class="bp-outreach-name"><div class="dot-paid"></div>FB/IG Ads</div><div class="bp-outreach-desc">$35/day. Activate after proving offer organically.</div></div>
+            <div class="bp-outreach-item"><div class="bp-outreach-name"><div class="dot-passive"></div>Referrals</div><div class="bp-outreach-desc">Free month for referrals. Activate at 5+ clients.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sales Process -->
+      <div class="panel bp-full">
+        <div class="panel-header"><div class="panel-title">🔄 The Sales Process</div></div>
+        <div class="bp-process">
+          <div class="bp-step"><div class="bp-step-num">1</div><div class="bp-step-content"><div class="bp-step-title">Outreach</div><div class="bp-step-desc">Cold SMS, calls, or Loom video. Lead responds.</div></div></div>
+          <div class="bp-step"><div class="bp-step-num">2</div><div class="bp-step-content"><div class="bp-step-title">Qualify</div><div class="bp-step-desc">High volume trades only. Can they take on more work?</div></div></div>
+          <div class="bp-step"><div class="bp-step-num">3</div><div class="bp-step-content"><div class="bp-step-title">Book</div><div class="bp-step-desc">10-min consult. Cap to 48-72hr window only.</div><div class="bp-step-rule">Send Trojan Loom VSL immediately after booking</div></div></div>
+          <div class="bp-step"><div class="bp-step-num">4</div><div class="bp-step-content"><div class="bp-step-title">VSL Check</div><div class="bp-step-desc">Morning of call: "Did you watch the video?" If NO → reschedule. Never take a call from someone who hasn't watched.</div></div></div>
+          <div class="bp-step"><div class="bp-step-num">5</div><div class="bp-step-content"><div class="bp-step-title">Sales Call (20-35 min)</div><div class="bp-step-desc">They arrive pre-sold. Answer questions, remove objections, demo the system.</div></div></div>
+          <div class="bp-step"><div class="bp-step-num">6</div><div class="bp-step-content"><div class="bp-step-title">Close</div><div class="bp-step-desc">Get card on file ON the call. Fill onboarding form together.</div><div class="bp-step-rule">NEVER let them off the phone without a credit card</div></div></div>
+        </div>
+      </div>
+
+      <!-- Growth Flywheel -->
+      <div class="panel bp-full">
+        <div class="panel-header"><div class="panel-title">🔁 The Growth Flywheel</div></div>
+        <div class="bp-flywheel">
+          <div class="bp-fw-step">📡 Outreach</div><div class="bp-fw-arrow">→</div>
+          <div class="bp-fw-step">📅 Book</div><div class="bp-fw-arrow">→</div>
+          <div class="bp-fw-step">🎬 VSL</div><div class="bp-fw-arrow">→</div>
+          <div class="bp-fw-step">💳 Close</div><div class="bp-fw-arrow">→</div>
+          <div class="bp-fw-step">⚙️ Deliver</div><div class="bp-fw-arrow">→</div>
+          <div class="bp-fw-step">⭐ Reviews</div><div class="bp-fw-arrow">→</div>
+          <div class="bp-fw-step">🤝 Referral</div><div class="bp-fw-arrow">→</div>
+          <div class="bp-fw-step">📈 Scale</div>
+        </div>
+      </div>
+
+      <!-- Revenue Projections -->
+      <div class="panel bp-full">
+        <div class="panel-header"><div class="panel-title">📊 Revenue Projections</div></div>
+        <div class="bp-revenue">
+          <div class="bp-rev-card"><div class="bp-rev-clients">5</div><div class="bp-rev-label">clients</div><div class="bp-rev-mrr">~$1,000/mo</div></div>
+          <div class="bp-rev-card"><div class="bp-rev-clients">10</div><div class="bp-rev-label">clients</div><div class="bp-rev-mrr">~$2,500/mo</div></div>
+          <div class="bp-rev-card"><div class="bp-rev-clients">30</div><div class="bp-rev-label">clients</div><div class="bp-rev-mrr">~$7,500/mo</div></div>
+          <div class="bp-rev-card"><div class="bp-rev-clients">50</div><div class="bp-rev-label">clients</div><div class="bp-rev-mrr">~$12,500/mo</div></div>
+          <div class="bp-rev-card" style="border-color:#22c55e44;"><div class="bp-rev-clients" style="color:#22c55e;">130</div><div class="bp-rev-label">clients</div><div class="bp-rev-mrr" style="color:#22c55e;font-size:15px;">~$30K/mo</div></div>
+        </div>
+      </div>
+
+      <!-- What's Next -->
+      <div class="panel bp-full">
+        <div class="panel-header"><div class="panel-title">⚡ What Happens Next</div></div>
+        <div class="bp-next">
+          <div class="bp-next-item"><div class="bp-next-check now">→</div><div class="bp-next-text"><strong>Regulatory bundle approved</strong> → buy AU mobile number → SMS goes live</div><div class="bp-next-tag now">This week</div></div>
+          <div class="bp-next-item"><div class="bp-next-check now">→</div><div class="bp-next-text"><strong>Activate SMS workflow</strong> → 171 landscapers in queue, ready to send</div><div class="bp-next-tag now">This week</div></div>
+          <div class="bp-next-item"><div class="bp-next-check now">→</div><div class="bp-next-text"><strong>Record Trojan Loom VSL</strong> → generic version first, script is ready</div><div class="bp-next-tag now">This week</div></div>
+          <div class="bp-next-item"><div class="bp-next-check now">→</div><div class="bp-next-text"><strong>Start cold calling</strong> → 30-50 calls just to get comfortable</div><div class="bp-next-tag now">This week</div></div>
+          <div class="bp-next-item"><div class="bp-next-check">○</div><div class="bp-next-text"><strong>3-5 paying clients</strong> → first revenue, first testimonials</div><div class="bp-next-tag soon">30 days</div></div>
+          <div class="bp-next-item"><div class="bp-next-check">○</div><div class="bp-next-text"><strong>10 clients → hire delivery VA</strong> → Sam focuses on sales only</div><div class="bp-next-tag soon">90 days</div></div>
+          <div class="bp-next-item"><div class="bp-next-check">○</div><div class="bp-next-text"><strong>$30K/month</strong> → 130 clients, VA handles delivery, Sam owns the business</div><div class="bp-next-tag">Long term</div></div>
+        </div>
+      </div>
+
+    </div><!-- end blueprint -->
+
+  </div>
+</div>
+
+<script>
+const KEYS = { agency: 'fd_agency_key', jenk: 'fd_jenk_key', location: 'fd_jenk_location' };
+let config = {};
+
+function showTab(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+function saveConfig() {
+  const agency = document.getElementById('inp-agency').value.trim();
+  const jenk = document.getElementById('inp-jenk').value.trim();
+  const location = document.getElementById('inp-location').value.trim();
+  if (!agency || !jenk || !location) return alert('All three fields are required.');
+  localStorage.setItem(KEYS.agency, agency);
+  localStorage.setItem(KEYS.jenk, jenk);
+  localStorage.setItem(KEYS.location, location);
+  launchApp();
+}
+
+function resetConfig() {
+  Object.values(KEYS).forEach(k => localStorage.removeItem(k));
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('setup').style.display = 'block';
+}
+
+function launchApp() {
+  config = {
+    agencyKey: localStorage.getItem(KEYS.agency),
+    jenkKey: localStorage.getItem(KEYS.jenk),
+    jenkLocationId: localStorage.getItem(KEYS.location),
+  };
+  document.getElementById('setup').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+
+  const now = new Date();
+  document.getElementById('brief-date').textContent = now.toLocaleDateString('en-AU', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+  });
+
+  loadAll();
+}
+
+async function loadAll() {
+  document.getElementById('lastSync').textContent = 'Syncing...';
+  await Promise.all([loadBrief(), loadContacts(), loadAgency()]);
+  document.getElementById('lastSync').textContent = 'Synced ' + new Date().toLocaleTimeString();
+}
+
+async function loadBrief() {
+  try {
+    const res = await fetch('/brief');
+    const data = await res.json();
+
+    if (data.error) throw new Error(data.error);
+
+    const { warmLeads, followups, actionList, stats, aiPowered } = data;
+
+    // Stats
+    document.getElementById('stat-warm').textContent = stats.warmLeads;
+    document.getElementById('stat-followup').textContent = stats.followups;
+    document.getElementById('stat-booked').textContent = stats.booked;
+    document.getElementById('stat-closed').textContent = stats.closed;
+    document.getElementById('stat-total').textContent = stats.total;
+    document.getElementById('warm-count').textContent = stats.warmLeads;
+    document.getElementById('followup-count').textContent = stats.followups;
+
+    // AI label
+    if (aiPowered) document.getElementById('ai-label').style.display = 'inline';
+
+    // Action list
+    if (actionList.length) {
+      document.getElementById('actionList').innerHTML = `<div class="action-list">
+        ${actionList.map((a, i) => `
+          <div class="action-item">
+            <div class="action-num">${i + 1}</div>
+            <div class="action-text">${a}</div>
+          </div>`).join('')}
+      </div>`;
+    } else {
+      document.getElementById('actionList').innerHTML = '<div class="empty">No actions generated.</div>';
+    }
+
+    // Warm leads
+    if (warmLeads.length) {
+      document.getElementById('warmLeads').innerHTML = `<div class="lead-list">
+        ${warmLeads.map(l => `
+          <div class="lead-card warm">
+            <div class="lead-top">
+              <div class="lead-name">${l.name}</div>
+              <div class="lead-phone">${l.phone}</div>
+              <div class="lead-niche">${l.niche}</div>
+            </div>
+            <div class="lead-opener">${l.opener}</div>
+          </div>`).join('')}
+      </div>`;
+    } else {
+      document.getElementById('warmLeads').innerHTML = `<div class="empty">
+        <span>📭</span>No warm leads yet — keep sending SMS to fill the pipeline.
+      </div>`;
+    }
+
+    // Follow-ups
+    if (followups.length) {
+      document.getElementById('followupList').innerHTML = `<div class="lead-list">
+        ${followups.map(l => `
+          <div class="lead-card followup">
+            <div class="lead-top">
+              <div class="lead-name">${l.name}</div>
+              <div class="lead-phone">${l.phone}</div>
+              <div class="lead-stage">${l.stage}</div>
+            </div>
+          </div>`).join('')}
+      </div>`;
+    } else {
+      document.getElementById('followupList').innerHTML = `<div class="empty">
+        <span>✅</span>No follow-ups due — you're on top of it.
+      </div>`;
+    }
+
+  } catch (err) {
+    document.getElementById('actionList').innerHTML = `<div class="error-msg">Brief error: ${err.message}</div>`;
+  }
+}
+
+async function loadContacts() {
+  const dot = document.getElementById('dot-jenk');
+  const sub = document.getElementById('status-jenk-sub');
+  const panel = document.getElementById('contactsPanel');
+  try {
+    const res = await fetch(`https://services.leadconnectorhq.com/contacts/?locationId=${config.jenkLocationId}&limit=20`, {
+      headers: { 'Authorization': `Bearer ${config.jenkKey}`, 'Version': '2021-07-28' }
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || res.status);
+    const contacts = data.contacts || [];
+    dot.className = 'dot green';
+    sub.textContent = `${contacts.length} contacts loaded`;
+    document.getElementById('contact-count').textContent = contacts.length;
+    panel.innerHTML = `<table>
+      <thead><tr><th>Name</th><th>Phone</th><th>Tags</th><th>Stage</th></tr></thead>
+      <tbody>${contacts.map(c => {
+        const name = [c.firstName, c.lastName].filter(Boolean).join(' ') || '—';
+        const tags = c.tags?.length
+          ? c.tags.map(t => `<span class="tag">${t}</span>`).join('')
+          : '<span class="tag empty">no tags</span>';
+        return `<tr>
+          <td>${name}</td>
+          <td style="color:#888">${c.phone || '—'}</td>
+          <td>${tags}</td>
+          <td style="color:#555;font-size:12px">${c.lastStage || c.pipelineStage || '—'}</td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>`;
+  } catch (err) {
+    dot.className = 'dot red';
+    sub.textContent = 'Connection failed';
+    panel.innerHTML = `<div class="error-msg">Contacts error: ${err.message}</div>`;
+  }
+}
+
+async function loadAgency() {
+  const dot = document.getElementById('dot-agency');
+  const sub = document.getElementById('status-agency-sub');
+  const panel = document.getElementById('agencyPanel');
+  try {
+    const res = await fetch('https://services.leadconnectorhq.com/locations/search?limit=20', {
+      headers: { 'Authorization': `Bearer ${config.agencyKey}`, 'Version': '2021-07-28' }
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || res.status);
+    const locs = data.locations || [];
+    dot.className = 'dot green';
+    sub.textContent = `${locs.length} sub-accounts`;
+    document.getElementById('subaccount-count').textContent = locs.length;
+    panel.innerHTML = `<table>
+      <thead><tr><th>Name</th><th>Location ID</th><th>Status</th></tr></thead>
+      <tbody>${locs.map(l => `<tr>
+        <td>${l.name || '—'}</td>
+        <td style="color:#555;font-size:11px;font-family:monospace">${l.id}</td>
+        <td><span class="pill active">Active</span></td>
+      </tr>`).join('')}</tbody>
+    </table>`;
+  } catch (err) {
+    dot.className = 'dot red';
+    sub.textContent = 'Connection failed';
+    panel.innerHTML = `<div class="error-msg">Agency error: ${err.message}</div>`;
+  }
+}
+
+// Init
+fetch('/config')
+  .then(r => r.json())
+  .then(cfg => {
+    if (cfg.agencyKey && cfg.jenkKey && cfg.jenkLocationId) {
+      localStorage.setItem(KEYS.agency, cfg.agencyKey);
+      localStorage.setItem(KEYS.jenk, cfg.jenkKey);
+      localStorage.setItem(KEYS.location, cfg.jenkLocationId);
+      launchApp();
+    } else {
+      const hasKeys = Object.values(KEYS).every(k => localStorage.getItem(k));
+      hasKeys ? launchApp() : (document.getElementById('setup').style.display = 'block');
+    }
+  })
+  .catch(() => {
+    const hasKeys = Object.values(KEYS).every(k => localStorage.getItem(k));
+    hasKeys ? launchApp() : (document.getElementById('setup').style.display = 'block');
+  });
+</script>
+</body>
+</html>
