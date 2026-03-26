@@ -9,8 +9,10 @@ Sell pre-built GHL marketing system to local trades businesses.
 
 | Tier | Price | What's Included |
 |---|---|---|
-| Entry | $97 | Website only |
-| Core | $197–$297/month | Full system (see below) |
+| Core | $197/month | Website + business phone number + GHL app |
+| Full System | $297/month | All 5 automations (see below) |
+
+**Sales rule:** Always lead with $297. Downsell to $197 only if they hesitate.
 
 ## Product
 

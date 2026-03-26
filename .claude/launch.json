@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "FrontDesk OS",
+      "runtimeExecutable": "C:/Program Files/nodejs/node.exe",
+      "runtimeArgs": ["C:/Users/SJ/Documents/Jenk 2.0/dashboard/server.js"],
+      "port": 3000
+    },
+    {
+      "name": "Jenk. Website",
+      "runtimeExecutable": "C:/Program Files/nodejs/node.exe",
+      "runtimeArgs": ["C:/Users/SJ/Documents/Jenk 2.0/.claude/worktrees/determined-cannon/website/serve.js"],
+      "port": 3001
+    }
+  ]
+}
