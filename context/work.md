@@ -44,6 +44,17 @@ Kitchen remodelers, roofers, bathroom remodelers
 - **Go High Level** — CRM, pipelines, automations, client management
 - **Claude Code** — AI assistant and automation workspace
 
+## Business Model Inspiration
+
+FrontDesk is modeled after **Kai Stone / Stone Scaling**.
+Full research breakdown: `@references/kai-stone.md`
+
+Key principles to apply:
+- Low-barrier pricing → trust → upsell
+- Niche down on a specific client type
+- Authentic content over polished ads
+- SOPs + systems so it can scale without Sam doing everything
+
 ## Key Relationships
 
 - **Kai Stone** — mentor/model for scaling. Actively studying his approach.

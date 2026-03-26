@@ -19,7 +19,7 @@ You are Sam Jenkins' executive assistant and second brain. Everything you do sho
 - **Google Workspace** — email, docs, calendar
 - **Go High Level** — CRM, pipelines, automations, client management
 - **Claude Code** — primary AI workspace
-- No MCP servers connected yet
+- **ClickUp** — task management via MCP (`@taazkareem/clickup-mcp-server`)
 
 ---
 
